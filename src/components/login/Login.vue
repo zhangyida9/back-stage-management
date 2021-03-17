@@ -8,7 +8,6 @@
 </template>
 
 <script>
-
 import LoginTop from './child/LoginTop'
 import LoginForm from './child/LoginForm'
 

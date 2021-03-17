@@ -5,7 +5,10 @@ import {
   Form,
   FormItem,
   Input,
+  Message
  } from "element-ui"
+
+Vue.prototype.$message = Message
 
 Vue.use(Button)
 Vue.use(Form)
