@@ -1,17 +1,12 @@
 <template>
-  <home-container>
-    <!-- <template v-slot:home_main>
-      <el-main>111</el-main>
-    </template> -->
-  </home-container>
+  <div>
+    main
+  </div>
 </template>
 
 <script>
-// import HomeContainer from "./HomeContainer"
 export default {
-  // components: {
-  //   HomeContainer
-  // }
+
 }
 </script>
 

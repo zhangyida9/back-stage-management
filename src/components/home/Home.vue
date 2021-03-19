@@ -1,40 +1,47 @@
 <template>
-    <home-container>
-      <!-- <home-header/> -->
-       <template v-slot:home_header>
-      <span>后台管理系统</span>
-      <!-- <el-button @click="loginExitClick">退出</el-button> -->
-    </template>
-
-    <template v-slot:home_aside>
-      aside
-    </template>
-
-    <template v-slot:home_main>
-      main
-    </template>
-      <!-- <home-aside/> -->
-      <!-- <home-main/> -->
-    </home-container>
-
+  <el-container class="home_container">
+    <el-header>
+      <home-header/>
+    </el-header>
+    <el-container>
+      <el-aside width="200px">
+        <home-aside/>
+      </el-aside>
+      <el-main>
+        <home-main/>
+      </el-main>
+    </el-container>
+  </el-container>
 </template>
 
 <script>
-// import HomeHeader from "./child/HomeHeader"
-// import HomeAside from "./child/HomeAside"
-// import HomeMain from "./child/HomeMain"
-import HomeContainer from "./child/HomeContainer"
+import HomeHeader from "./child/HomeHeader"
+import HomeAside from "./child/HomeAside"
+import HomeMain from "./child/HomeMain"
 
 export default {
   components: {
-    // HomeHeader,
-    // HomeAside,
-    // HomeMain,
-    HomeContainer
+    HomeHeader,
+    HomeAside,
+    HomeMain
   }
 }
 </script>
 
 <style lang='scss' scoped>
+  .home_container {
+    height: 100%;
+  }
+  
+  .el-header {
+    background-color: #3e4f5a;
+  }
 
+  .el-aside {
+    background-color: #353d55;
+  }
+
+  .el-main {
+    background-color: #eaedf1;
+  }
 </style>
