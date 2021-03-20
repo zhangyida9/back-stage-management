@@ -13,7 +13,7 @@ import {
   Menu,
   Submenu,
   MenuItem,
-  MenuItemGroup
+  Icon
  } from "element-ui"
 
 Vue.prototype.$message = Message
@@ -29,5 +29,5 @@ Vue.use(Aside)
 Vue.use(Menu)
 Vue.use(Submenu)
 Vue.use(MenuItem)
-Vue.use(MenuItemGroup)
+Vue.use(Icon)
 
