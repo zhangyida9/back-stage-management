@@ -6,7 +6,7 @@
     <el-container>
       <home-aside/>
       <el-main>
-        <home-main/>
+        <router-view/>
       </el-main>
     </el-container>
   </el-container>
@@ -15,13 +15,11 @@
 <script>
 import HomeHeader from "./child/HomeHeader"
 import HomeAside from "./child/HomeAside"
-import HomeMain from "./child/HomeMain"
 
 export default {
   components: {
     HomeHeader,
     HomeAside,
-    HomeMain
   }
 }
 </script>

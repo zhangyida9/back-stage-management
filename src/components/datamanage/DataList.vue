@@ -1,8 +1,5 @@
 <template>
-  <el-main>
-    <!-- <router-view/> -->
-    welcome
-  </el-main>
+  <div>data list</div>
 </template>
 
 <script>
