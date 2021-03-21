@@ -17,28 +17,9 @@
       <template v-slot:button>添加用户</template>
       <!-- 表格 -->
       <template v-slot:table>
-        <el-table :data="userList" style="width: 100%" stripe border>
-          <el-table-column type="index" label="#"></el-table-column>
-          <el-table-column prop="username" label="姓名"></el-table-column>
-          <el-table-column prop="email" label="邮箱地址"></el-table-column>
-          <el-table-column prop="mobile" label="电话号码"></el-table-column>
-          <el-table-column prop="role_name" label="角色"></el-table-column>
-          <el-table-column prop="mg_state" label="状态">
-            <template slot-scope="scope">
-              <el-switch v-model="scope.row.mg_state" @change="userStatusChange(scope.row)"/>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="180px">
-            <!-- <template slot-scope="scope"> -->
-              <el-button type="primary" icon="el-icon-edit" size="mini"></el-button>
-              <el-button type="danger" icon="el-icon-delete" size="mini"></el-button>
-              <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
-                <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
-              </el-tooltip>
-            <!-- </template> -->
-          </el-table-column>
-        </el-table>
+        <user-table :userList="userList"/>
       </template>
+      <!-- 分页器 -->
       <template v-slot:pagination>
         <main-pagination :queryInfo="queryInfo" :total="total" @getUserList="getUserList"/>
       </template>
@@ -50,6 +31,7 @@
 import BreadcrumbNav from "components/common/BreadcrumbNav"
 import MainCard from "components/common/MainCard"
 import MainPagination from "components/common/MainPagination"
+import UserTable from "./UserTable"
 
 export default {
   data() {
@@ -66,6 +48,7 @@ export default {
   components: {
     BreadcrumbNav,
     MainCard,
+    UserTable,
     MainPagination
   },
   created() {
@@ -84,17 +67,6 @@ export default {
         this.total = res.data.total
         // console.log(this.userList)
         // console.log(this.total)
-      })
-    },
-    userStatusChange(userStatus) {
-      // console.log(userStatus)
-      this.$http({
-        method: 'put',
-        url: `users/${userStatus.id}/state/${userStatus.mg_state}`
-      }).then( res=> {
-        // console.log(res)
-        if(res.meta.status !== 200) return this.$message.error(res.meta.msg)
-        this.$message.success(res.meta.msg)
       })
     }
   }
