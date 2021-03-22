@@ -12,7 +12,7 @@
     </el-table-column>
     <el-table-column label="操作" width="180px">
       <!-- <template slot-scope="scope"> -->
-        <el-button type="primary" icon="el-icon-edit" size="mini"></el-button>
+        <el-button type="primary" icon="el-icon-edit" size="mini" @click="editUserClick"></el-button>
         <el-button type="danger" icon="el-icon-delete" size="mini"></el-button>
         <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
           <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
@@ -30,6 +30,12 @@ export default {
       default() {
         return []
       }
+    },
+    dialogVisible: {
+      type: Boolean,
+      default() {
+        return false
+      }
     }
   },
   methods: {
@@ -43,6 +49,9 @@ export default {
         if(res.meta.status !== 200) return this.$message.error(res.meta.msg)
         this.$message.success(res.meta.msg)
       })
+    },
+    editUserClick() {
+      this.dialogVisible
     }
   }
 }

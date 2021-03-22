@@ -5,7 +5,7 @@
         <slot name="search"/>
       </el-col>
       <el-col :span="4">
-        <el-button type="primary"><slot name="button"/></el-button>
+        <slot name="button"/>
       </el-col>    
     </el-row>
     <slot name="table"/>
