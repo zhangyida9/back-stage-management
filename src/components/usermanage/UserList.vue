@@ -32,13 +32,13 @@
             </template>
           </el-table-column>
           <el-table-column label="操作" width="180px">
-            <!-- <template slot-scope="scope"> -->
-              <el-button type="primary" icon="el-icon-edit" size="mini" @click="editDialogVisible=true"></el-button>
+            <template slot-scope="scope">
+              <el-button type="primary" icon="el-icon-edit" size="mini" @click="editButtonClick(scope.row.id)"></el-button>
               <el-button type="danger" icon="el-icon-delete" size="mini"></el-button>
               <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
                 <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
               </el-tooltip>
-            <!-- </template> -->
+            </template>
           </el-table-column>
         </el-table>
       </template>
@@ -62,8 +62,8 @@
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="addUserForm.email"></el-input>
         </el-form-item>
-        <el-form-item label="电话" prop="telephone">
-          <el-input v-model="addUserForm.telephone"></el-input>
+        <el-form-item label="电话" prop="mobile">
+          <el-input v-model="addUserForm.mobile"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -83,13 +83,13 @@
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="editUserForm.email"></el-input>
         </el-form-item>
-        <el-form-item label="电话" prop="telephone">
-          <el-input v-model="editUserForm.telephone"></el-input>
+        <el-form-item label="电话" prop="mobile">
+          <el-input v-model="editUserForm.mobile"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addUser">确 定</el-button>
+        <el-button @click="editDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="editUser">确 定</el-button>
       </span>
      </el-dialog>
     <!-- <user-dialog/> -->
@@ -120,14 +120,10 @@ export default {
         username: '',
         password: '',
         email: '',
-        telephone: ''
+        mobile: ''
       },
       //editUser dialog
-      editUserForm: {
-        username: '',
-        email: '',
-        telephone: ''
-      },
+      editUserForm: {},
       //添加用户校验
       addUserRules: {
         username: [
@@ -142,7 +138,7 @@ export default {
           { required: true, message: '请输入邮箱', trigger: 'blur' },
           { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
         ],
-        telephone: [
+        mobile: [
           { required: true, message: '请输入电话号码', trigger: 'blur' },
           { pattern: /^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/, message: '请输入正确的手机号码或者座机号',trigger: ['blur', 'change'] }
         ]
@@ -153,7 +149,7 @@ export default {
           { required: true, message: '请输入邮箱', trigger: 'blur' },
           { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
         ],
-        telephone: [
+        mobile: [
           { required: true, message: '请输入电话号码', trigger: 'blur' },
           { pattern: /^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/, message: '请输入正确的手机号码或者座机号',trigger: ['blur', 'change'] }
         ]
@@ -220,9 +216,39 @@ export default {
           // console.log(res)
           if(res.meta.status !== 201) return this.$message.error(res.meta.msg)
           this.$message.success(res.meta.msg)
-          this.dialogVisible = false
+          this.addDialogVisible = false
           this.getUserList()
         })  
+      })
+    },
+    editButtonClick(id) {
+      this.editDialogVisible = true
+      // console.log(id)
+      this.$http({
+        method: 'get',
+        url: `/users/${id}`,
+      }).then( res => {
+        this.editUserForm = res.data
+        // console.log(this.editUserForm)
+      })
+    },
+    //点击添加用户
+    editUser() {
+      this.$refs.editUserRef.validate( value => {
+        if(!value) return this.$message.error("请输入正确的信息")
+        this.$http({
+          method: 'put',
+          url: `/users/${this.editUserForm.id}`,
+          data: {
+            email: this.editUserForm.email,
+            mobile: this.editUserForm.mobile
+          }
+          }).then( res => {
+            if(res.meta.status !== 200) return this.$message.error("更新用户信息失败")
+            this.$message.success(res.meta.msg)
+            this.getUserList()
+            this.editDialogVisible = false
+        })
       })
     }
   }
