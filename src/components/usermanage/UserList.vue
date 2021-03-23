@@ -15,11 +15,32 @@
       </template>
       <!-- 按钮 -->
       <template v-slot:button>
-        <el-button type="primary" @click="dialogVisible=true">添加用户</el-button>
+        <el-button type="primary" @click="addDialogVisible=true">添加用户</el-button>
       </template>
       <!-- 表格 -->
       <template v-slot:table>
-        <user-table :userList="userList"/>
+        <!-- <user-table :userList="userList"/> -->
+        <el-table :data="userList" style="width: 100%" stripe border>
+          <el-table-column type="index" label="#"></el-table-column>
+          <el-table-column prop="username" label="姓名"></el-table-column>
+          <el-table-column prop="email" label="邮箱地址"></el-table-column>
+          <el-table-column prop="mobile" label="电话号码"></el-table-column>
+          <el-table-column prop="role_name" label="角色"></el-table-column>
+          <el-table-column prop="mg_state" label="状态">
+            <template slot-scope="scope">
+              <el-switch v-model="scope.row.mg_state" @change="userStatusChange(scope.row)"/>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="180px">
+            <!-- <template slot-scope="scope"> -->
+              <el-button type="primary" icon="el-icon-edit" size="mini" @click="editDialogVisible=true"></el-button>
+              <el-button type="danger" icon="el-icon-delete" size="mini"></el-button>
+              <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
+                <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+              </el-tooltip>
+            <!-- </template> -->
+          </el-table-column>
+        </el-table>
       </template>
       <!-- 分页器 -->
       <template v-slot:pagination>
@@ -29,7 +50,7 @@
     <!-- addUser dialog -->
      <el-dialog
       title="添加用户"
-      :visible.sync="dialogVisible"
+      :visible.sync="addDialogVisible"
       width="50%" @close="addDialogClosed">
       <el-form :model="addUserForm" :rules="addUserRules" ref="addUserRef" label-width="80px">
         <el-form-item label="用户名" prop="username">
@@ -53,11 +74,11 @@
      <!-- editUser dialog -->
      <el-dialog
       title="修改用户"
-      :visible.sync="dialogVisible"
-      width="50%" @close="editDialogClosed" :dialogVisible="!dialogVisible">
+      :visible.sync="editDialogVisible"
+      width="50%" @close="editDialogClosed">
       <el-form :model="editUserForm" :rules="editUserRules" ref="editUserRef" label-width="80px">
         <el-form-item label="用户名" prop="username">
-          <el-input v-model="editUserForm.username"></el-input>
+          <el-input v-model="editUserForm.username" disabled></el-input>
         </el-form-item>
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="editUserForm.email"></el-input>
@@ -79,7 +100,7 @@
 import BreadcrumbNav from "components/common/BreadcrumbNav"
 import MainCard from "components/common/MainCard"
 import MainPagination from "components/common/MainPagination"
-import UserTable from "./UserTable"
+// import UserTable from "./UserTable"
 // import UserDialog from "./UserDialog"
 
 export default {
@@ -92,7 +113,8 @@ export default {
       },
       userList: [],
       total: 0,
-      dialogVisible: false,
+      addDialogVisible: false,
+      editDialogVisible: false,
       //addUser dialog
       addUserForm: {
         username: '',
@@ -106,6 +128,7 @@ export default {
         email: '',
         telephone: ''
       },
+      //添加用户校验
       addUserRules: {
         username: [
           { required: true, message: '请输入用户名', trigger: 'blur' },
@@ -124,7 +147,17 @@ export default {
           { pattern: /^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/, message: '请输入正确的手机号码或者座机号',trigger: ['blur', 'change'] }
         ]
       },
-      editUserRules: this.addUserRules,
+      //修改用户校验
+      editUserRules: {
+        email: [
+          { required: true, message: '请输入邮箱', trigger: 'blur' },
+          { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
+        ],
+        telephone: [
+          { required: true, message: '请输入电话号码', trigger: 'blur' },
+          { pattern: /^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/, message: '请输入正确的手机号码或者座机号',trigger: ['blur', 'change'] }
+        ]
+      },
       //添加用户
       username: '',
       password: '',
@@ -134,7 +167,7 @@ export default {
   components: {
     BreadcrumbNav,
     MainCard,
-    UserTable,
+    // UserTable,
     MainPagination,
     // UserDialog
   },
@@ -156,12 +189,23 @@ export default {
         // console.log(this.total)
       })
     },
+    userStatusChange(userStatus) {
+      // console.log(userStatus)
+      this.$http({
+        method: 'put',
+        url: `users/${userStatus.id}/state/${userStatus.mg_state}`
+      }).then( res=> {
+        // console.log(res)
+        if(res.meta.status !== 200) return this.$message.error(res.meta.msg)
+        this.$message.success(res.meta.msg)
+      })
+    },
     //监听添加用户对话框关闭
     addDialogClosed() {
       this.$refs.addUserRef.resetFields()
     },
     editDialogClosed() {
-      this.$refs.editUserRules.resetFields()
+      this.$refs.editUserRef.resetFields()
     },
     // 点击按钮添加用户
     addUser() {
