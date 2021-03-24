@@ -34,7 +34,7 @@
           <el-table-column label="操作" width="180px">
             <template slot-scope="scope">
               <el-button type="primary" icon="el-icon-edit" size="mini" @click="editButtonClick(scope.row.id)"></el-button>
-              <el-button type="danger" icon="el-icon-delete" size="mini"></el-button>
+              <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeUsersById(scope.row.id)"></el-button>
               <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
                 <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
               </el-tooltip>
@@ -250,6 +250,28 @@ export default {
             this.editDialogVisible = false
         })
       })
+    },
+    removeUsersById(id) {
+       this.$confirm('此操作将永久删除此用户, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$http({
+            method: 'delete',
+            url: `/users/${id}`
+          }).then( res=> {
+            // console.log(res)
+            if(res.meta.status !== 200) return this.$message.error(res.meta.msg)
+            this.$message.success(res.meta.msg)
+            this.getUserList()
+          })
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });          
+        });
     }
   }
 }
