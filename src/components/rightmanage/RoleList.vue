@@ -13,7 +13,24 @@
       </template>
       <template v-slot:table>
         <el-table :data="rolesList" style="width: 100%" stripe border>
-          <el-table-column type="expand"></el-table-column>
+          <el-table-column type="expand">
+            <template slot-scope="scope">
+              <!-- <pre>{{scope.row}}</pre> -->
+              <!-- 一级权限 -->
+              <el-row v-for="(item1, index1) in scope.row.children" :key="item1.id" :class="['bdbottom', index1 == 0 ? 'bdtop' : '']">
+                <el-col :span="5">
+                  <el-tag closable>{{ item1.authName }}</el-tag>
+                  <i class="el-icon-caret-right"></i>
+                </el-col>
+              <!-- 二三级权限 -->
+                <el-col :span="19">
+                    <el-row>
+                      <el-col :span="6"></el-col>
+                    </el-row>
+                </el-col>
+              </el-row>
+            </template>
+          </el-table-column>
           <el-table-column type="index" label="#"></el-table-column>
           <el-table-column prop="roleName" label="角色名称"></el-table-column>
           <el-table-column prop="roleDesc" label="角色描述"></el-table-column>
@@ -175,12 +192,20 @@ export default {
           type: 'info',
           message: '已取消删除'
         });          
-      });
+      })
     }
   }
 }
 </script>
 
 <style lang='scss' scoped>
-
+  .el-tag {
+   margin: 7px;
+ }
+  .bdtop {
+    border-top: 1px solid #eee;
+  }
+  .bdbottom {
+    border-bottom: 1px solid #eee;
+  }
 </style>
