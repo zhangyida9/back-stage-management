@@ -17,15 +17,26 @@
             <template slot-scope="scope">
               <!-- <pre>{{scope.row}}</pre> -->
               <!-- 一级权限 -->
-              <el-row v-for="(item1, index1) in scope.row.children" :key="item1.id" :class="['bdbottom', index1 == 0 ? 'bdtop' : '']">
+              <el-row v-for="(item1, index1) in scope.row.children" :key="item1.id" 
+              :class="['bdbottom','vcenter', index1 == 0 ? 'bdtop' : '']">
                 <el-col :span="5">
-                  <el-tag closable>{{ item1.authName }}</el-tag>
+                  <el-tag closable @close="removeRightById(scope.row, item1.id)">{{ item1.authName }}</el-tag>
                   <i class="el-icon-caret-right"></i>
                 </el-col>
               <!-- 二三级权限 -->
                 <el-col :span="19">
-                    <el-row>
-                      <el-col :span="6"></el-col>
+                    <el-row v-for="(item2, index2) in item1.children" :key="item2.id" 
+                    :class="['vcenter', index2 == 0 ? '' : 'bdtop']">
+                      <!-- 二级权限 -->
+                      <el-col :span="6">
+                        <el-tag type="success" closable @close="removeRightById(scope.row, item1.id)">{{ item2.authName }}</el-tag>
+                        <i class="el-icon-caret-right"></i>
+                      </el-col>
+                      <!-- 三级权限 -->
+                      <el-col :span="18">
+                        <el-tag type="warning" closable v-for="item3 in item2.children" 
+                        :key="item3.id" @close="removeRightById(scope.row, item3.id)">{{ item3.authName }}</el-tag>
+                      </el-col>
                     </el-row>
                 </el-col>
               </el-row>
@@ -38,7 +49,7 @@
             <template slot-scope="scope">
               <el-button type="primary" size="mini" icon="el-icon-edit" @click="editIcoClick(scope.row.id)">编辑</el-button>
               <el-button type="danger" size="mini" icon="el-icon-delete" @click="deleteIcoClick(scope.row.id)">删除</el-button>
-              <el-button type="warning" size="mini" icon="el-icon-setting">分配权限</el-button>
+              <el-button type="warning" size="mini" icon="el-icon-setting" @click="showSetRightDialong">分配权限</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -82,6 +93,18 @@
         <el-button type="primary" @click="editRoles">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- setRight dialog -->
+    <el-dialog
+      title="分配角色权限"
+      :visible.sync="setRightDialogVisible"
+      width="50%">
+      <!-- 树形控件 -->
+      <el-tree :data="rightList" :props="treeProps" show-checkbox default-expand-all node-key="id"></el-tree>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="setRightDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="setRightDialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -98,6 +121,7 @@ export default {
       rolesList: [],
       addRolesDialogVisible: false,
       editRolesDialogVisible: false,
+      setRightDialogVisible: false,
       addRolesListForm: {
         roleName: '',
         roleDesc: ''
@@ -110,6 +134,11 @@ export default {
       addRoleRules: {
         roleName: [],
         roleDesc: []
+      },
+      rightList: [],
+      treeProps: {
+        label: 'authName',
+        children: 'children',
       }
     }
   },
@@ -191,7 +220,41 @@ export default {
         this.$message({
           type: 'info',
           message: '已取消删除'
-        });          
+        })       
+      })
+    },
+    removeRightById(role, rightID) {
+      this.$confirm('此操作将永久删除该权限, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$http({
+            method: 'delete',
+            url: `roles/${role.id}/rights/${rightID}`
+          }).then( res => {
+            this.$message({
+            type: 'success',
+            message: '删除成功!'
+            });
+            role.children = res.data
+          }) 
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })          
+        })
+    },
+    showSetRightDialong() {
+      this.setRightDialogVisible = true
+      this.$http({
+        url: 'rights/tree'
+      }).then( res => {
+        // console.log(res)
+        if(res.meta.status !== 200) return this.$message.error(res.meta.msg)
+        this.rightList = res.data
+        // console.log(this.rightList)
       })
     }
   }
@@ -207,5 +270,9 @@ export default {
   }
   .bdbottom {
     border-bottom: 1px solid #eee;
+  }
+  .vcenter {
+  display: flex;
+  align-items: center;
   }
 </style>
