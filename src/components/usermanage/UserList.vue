@@ -36,7 +36,7 @@
               <el-button type="primary" icon="el-icon-edit" size="mini" @click="editButtonClick(scope.row.id)"></el-button>
               <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeUsersById(scope.row.id)"></el-button>
               <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
-                <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+                <el-button type="warning" icon="el-icon-setting" size="mini" @click="setRoleClick(scope.row)"></el-button>
               </el-tooltip>
             </template>
           </el-table-column>
@@ -93,6 +93,30 @@
       </span>
      </el-dialog>
     <!-- <user-dialog/> -->
+    <!-- setRole dialog -->
+    <el-dialog
+      title="分配角色"
+      :visible.sync="setRoleDialogVisible"
+      width="50%">
+      <div>
+        <p>当前的用户：{{ userInfo.username }}</p>
+        <p>当前的用角色：{{ userInfo.role_name }}</p>
+        <p>分配新角色：
+          <el-select v-model="selectedId" placeholder="请选择">
+            <el-option
+              v-for="item in roleList"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </p>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="setRoleDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="saveRoleInfo">确 定</el-button>
+      </span>
+    </el-dialog>
   </div> 
 </template>
 
@@ -157,7 +181,10 @@ export default {
       //添加用户
       username: '',
       password: '',
-
+      setRoleDialogVisible: false,
+      userInfo: {},
+      roleList: [],
+      selectedId: ''
     }
   },
   components: {
@@ -177,7 +204,7 @@ export default {
         url: '/users',
         params: this.queryInfo
       }).then( res=> {
-        // console.log(res)
+        console.log(res)
         if (res.meta.status !== 200) return this.$message.error('获取用户列表失败')
         this.userList = res.data.users
         this.total = res.data.total
@@ -272,11 +299,38 @@ export default {
             message: '已取消删除'
           });          
         });
+    },
+    //分配角色
+    setRoleClick(userInfo) {
+      this.userInfo = userInfo
+      //获取所有角色列表
+      this.$http({
+        url: '/roles'
+      }).then( res=> {
+        this.roleList = res.data
+        console.log(this.roleList)
+      })
+      this.setRoleDialogVisible = true
+    },
+    saveRoleInfo() {
+      if(!this.selectedId) return this.$message.error("请选择要分配的角色")
+      this.$http({
+        method: 'put',
+        url: `users/${this.userInfo.id}/role`,
+        data: {rid: this.selectedId}
+      }).then( res=> {
+        if(res.meta.status !== 200) return this.$message.error(res.meta.msg)
+        this.$message.success("分配角色成功")
+        this.getUserList()
+        this.setRoleDialogVisible = false
+      })
     }
   }
 }
 </script>
 
 <style lang='scss' scoped>
-
+  p {
+    margin-bottom: 10px;
+  }
 </style>
