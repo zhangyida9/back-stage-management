@@ -204,7 +204,7 @@ export default {
         url: '/users',
         params: this.queryInfo
       }).then( res=> {
-        console.log(res)
+        // console.log(res)
         if (res.meta.status !== 200) return this.$message.error('获取用户列表失败')
         this.userList = res.data.users
         this.total = res.data.total
@@ -308,7 +308,7 @@ export default {
         url: '/roles'
       }).then( res=> {
         this.roleList = res.data
-        console.log(this.roleList)
+        // console.log(this.roleList)
       })
       this.setRoleDialogVisible = true
     },
