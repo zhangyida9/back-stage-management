@@ -9,6 +9,7 @@
       </el-col>    
     </el-row>
     <slot name="table"/>
+    <slot name="tree-table"/>
     <slot name="pagination"/>
   </el-card>
 </template>
