@@ -5,7 +5,7 @@
       <template v-slot:right>商品分类</template>
     </breadcrumb-nav>
     <main-card>
-      <template v-slot:button><el-button type="primary">添加分类</el-button></template>
+      <template v-slot:button><el-button type="primary" @click="showAddCateDialog">添加分类</el-button></template>
     <!-- 表格 -->
       <template v-slot:tree-table>
         <tree-table
@@ -48,6 +48,36 @@
         </el-pagination>
       </template>
     </main-card>
+    <!-- 添加分类对话框 -->
+    <el-dialog
+      title="添加分类"
+      :visible.sync="addCateDialogVisible"
+      width="50%"
+      @close="addCateDialogClosed">
+      <el-form
+        :model="addCateForm"
+        :rules="addCateFormRules"
+        ref="addCateFormRef"
+        label-width="100px">
+        <el-form-item label="分类名称：" prop="cat_name">
+          <el-input v-model="addCateForm.cat_name"></el-input>
+        </el-form-item>
+        <el-form-item label="父级分类：">
+          <el-cascader
+            v-model="selectedKeys"
+            :options="parentCateList"
+            @change="parentCateChanged"
+            :props="cascaderProps"
+            clearable
+            change-on-select
+          ></el-cascader>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="addCateDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addCate">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -89,7 +119,42 @@ export default {
           type: 'template',
           template: 'opt'
         }
-      ]
+      ],
+      addCateDialogVisible: false,
+      addCateForm: {
+        // 父级分类id
+        cat_pid: 0,
+        // 分类名称
+        cat_name: '',
+        // 分类层级 默认1级分类
+        cat_level: 0,
+      },
+      // 验证表单规则对象
+      addCateFormRules: {
+        cat_name: [
+          { required: true, message: '请输入分类名称', trigger: 'blur' },
+        ],
+      },
+      // 父级分类列表
+      parentCateList: [],
+      // 指定级联选择器 配置对象
+      cascaderProps: {
+        value: 'cat_id',
+        label: 'cat_name',
+        children: 'children',
+      },
+      // 被选中项 父级分类id
+      selectedKeys: [],
+      // 编辑 分类 数据对象
+      editCateForm: {},
+      // 编辑提示框 弹出
+      editCateDialogVisible: false,
+      // 编辑 表单 验证
+      editCateFormRules: {
+        cat_name: [
+          { required: true, message: '请输入分类名称', trigger: 'blur' },
+        ],
+      }
     }
   },
   created() {
@@ -116,7 +181,110 @@ export default {
       this.queryInfo.pagenum = newPage
       this.getCategoriesList()
     }
-  }
+  },
+    // 获取父级列表数据
+    getParentCateList() {
+      this.$http({ url: '/categories', params: { type: 2 } }).then((res) => {
+        console.log(res)
+        if (res.meta.status !== 200) {
+          return this.$message.error('请求父级分类列表失败')
+        }
+        this.parentCateList = res.data
+      })
+    },
+    // 点击选择
+    parentCateChanged() {
+      console.log(this.selectedKeys)
+      //当 有选择后 selectedKeys 有长度
+      if (this.selectedKeys.length > 0) {
+        // 父级分类id 赋值
+        this.addCateForm.cat_pid = this.selectedKeys[
+          this.selectedKeys.length - 1
+        ]
+        //为当前  分类等级 赋值
+        this.addCateForm.cat_level = this.selectedKeys.length
+        return
+      } else {
+        // 父级分类id
+        this.addCateForm.cat_pid = 0
+        // 当前分类等级
+        this.addCateForm.cat_level = 0
+      }
+    },
+    // 点击确定 添加
+    addCate() {
+      console.log(this.addCateForm)
+      this.$refs.addCateFormRef.validate((vaild) => {
+        if (!vaild) return
+        this.$http({
+          url: '/categories',
+          method: 'post',
+          data: this.addCateForm,
+        }).then((res) => {
+          console.log(res)
+          if (res.meta.status !== 201) {
+            return this.$message.error('添加分类失败')
+          }
+          this.$message.success('添加分类成功')
+          this.getCateList()
+          this.addCateDialogVisible = false
+        })
+      })
+    },
+    // 监听对话框的 关闭事件
+    addCateDialogClosed() {
+      this.$refs.addCateFormRef.resetFields()
+      this.selectedKeys = []
+      this.addCateForm.cat_level = 0
+      this.addCateForm.cat_pid = 0
+    },
+    // 点击编辑 按钮 弹出对话框
+    showEditCateDialog(item) {
+      this.editCateForm = item
+      this.editCateDialogVisible = true
+    },
+    // 点击编辑中的确定 提交
+    editCate() {
+      console.log(this.editCateForm)
+      this.$http({
+        url: '/categories/' + this.editCateForm.cat_id,
+        method: 'put',
+        data: { cat_name: this.editCateForm.cat_name },
+      }).then((res) => {
+        console.log(res)
+        if (res.meta.status !== 200) {
+          return this.$message.error('修改失败')
+        }
+        this.$message.success('修改成功')
+        this.getCateList()
+        this.editCateDialogVisible = false
+      })
+    },
+    // 监听 编辑对话框关闭事件
+    editCateDialogClosed() {
+      this.$refs.editCateFormRef.resetFields()
+    },
+    removeCate(id) {
+      this.$confirm('此操作将永久删除该商品分类, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+        .then(() => {
+          this.$http({ url: '/categories/' + id, method: 'delete' }).then(
+            (res) => {
+              if (res.meta.status !== 200) {
+                return this.$message.error('取消失败')
+              }
+              this.$message.success('删除成功')
+              this.getCateList()
+            }
+          )
+        })
+        .catch(() => {
+          this.$message('取消删除')
+        })
+    }
 }
 </script>
 
