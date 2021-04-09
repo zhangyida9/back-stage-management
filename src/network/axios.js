@@ -1,4 +1,4 @@
-import originAxios from 'axios'
+/*import originAxios from 'axios'
 // import qs from 'qs'
 
 export default function axios(option) {
@@ -64,4 +64,4 @@ export default function axios(option) {
         reject(err)
       })
   })
-}
+}*/
