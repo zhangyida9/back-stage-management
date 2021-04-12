@@ -14,7 +14,9 @@ html {
   color: #666666;
   background: #ffffff;
   font-size: 14px;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0); }
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  min-width: 1366px;
+}
 
 a {
   text-decoration: none;

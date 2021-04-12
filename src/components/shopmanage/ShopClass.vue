@@ -29,10 +29,10 @@
           <el-tag type="warning" size="mini" v-else>三级</el-tag>
         </template>
         <!-- 操作 -->
-        <!-- <template slot="opt" slot-scope="scope"> -->
+        <template slot="opt">
           <el-button type="primary" icon="el-icon-edit" size="mini">编辑</el-button>
           <el-button type="danger" icon="el-icon-delete" size="mini">删除</el-button>
-        <!-- </template> -->
+        </template>
       </tree-table>
 
       <!-- 分页区域 -->
@@ -138,20 +138,20 @@ export default {
   },
   methods: {
     // 获取商品分类数据
-    async getCateList() {
-      const { data: res } = await this.$http.get('categories', {
+    getCateList() {
+      this.$http({
+        method: 'get',
+        url: '/categories',
         params: this.querInfo
-      })
-
-      if (res.meta.status !== 200) {
+      }).then( res=> {
+        if (res.meta.status !== 200) {
         return this.$message.error('获取商品分类失败！')
-      }
-
-      console.log(res.data)
-      // 把数据列表，赋值给 catelist
-      this.catelist = res.data.result
-      // 为总数据条数赋值
-      this.total = res.data.total
+        }
+        // 把数据列表，赋值给 catelist
+        this.catelist = res.data.result
+        // 为总数据条数赋值
+        this.total = res.data.total
+      })
     },
     // 监听 pagesize 改变
     handleSizeChange(newSize) {
@@ -171,21 +171,22 @@ export default {
       this.addCateDialogVisible = true
     },
     // 获取父级分类的数据列表
-    async getParentCateList() {
-      const { data: res } = await this.$http.get('categories', {
+    getParentCateList() {
+      this.$http({
+        method: 'get',
+        url: '/categories',
         params: { type: 2 }
-      })
-
-      if (res.meta.status !== 200) {
+      }).then( res=> {
+        if (res.meta.status !== 200) {
         return this.$message.error('获取父级分类数据失败！')
-      }
-
-      console.log(res.data)
-      this.parentCateList = res.data
+        }
+        // console.log(res.data)
+        this.parentCateList = res.data
+      })
     },
     // 选择项发生变化触发这个函数
     parentCateChanged() {
-      console.log(this.selectedKeys)
+      // console.log(this.selectedKeys)
       // 如果 selectedKeys 数组中的 length 大于0，证明选中的父级分类
       // 反之，就说明没有选中任何父级分类
       if (this.selectedKeys.length > 0) {
@@ -204,20 +205,21 @@ export default {
     },
     // 点击按钮，添加新的分类
     addCate() {
-      this.$refs.addCateFormRef.validate(async valid => {
+      this.$refs.addCateFormRef.validate( valid => {
         if (!valid) return
-        const { data: res } = await this.$http.post(
-          'categories',
-          this.addCateForm
-        )
-
-        if (res.meta.status !== 201) {
+        this.$http({
+          method: 'post',
+          url: '/categories',
+          data: this.addCateForm
+        }).then( res=> {
+          if (res.meta.status !== 201) {
           return this.$message.error('添加分类失败！')
         }
 
-        this.$message.success('添加分类成功！')
-        this.getCateList()
-        this.addCateDialogVisible = false
+          this.$message.success('添加分类成功！')
+          this.getCateList()
+          this.addCateDialogVisible = false
+        })  
       })
     },
     // 监听对话框的关闭事件，重置表单数据
@@ -232,6 +234,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.el-breadcrumb {
+  margin-bottom: 15px;
+}
+
 .treeTable {
   margin-top: 15px;
 }
