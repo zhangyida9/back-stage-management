@@ -56,4 +56,7 @@ a {
   white-space: nowrap;
   text-overflow: ellipsis; }
 
+.el-cascader-panel{
+  height: 300px !important;
+}
 /*# sourceMappingURL=base.css.map */
